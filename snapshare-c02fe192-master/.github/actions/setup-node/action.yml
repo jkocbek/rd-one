@@ -1,0 +1,22 @@
+name: 'Setup Node and Install Dependencies'
+description: 'Checkout code, setup Node.js and install dependencies'
+inputs:
+  node-version:
+    description: 'Node.js version'
+    required: true
+    default: '20.x'
+runs:
+  using: 'composite'
+  steps:
+    - name: Check out repository code
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ inputs.node-version }}
+        cache: yarn
+
+    - name: Install Dependencies
+      run: yarn install --immutable
+      shell: bash

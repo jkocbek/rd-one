@@ -1,0 +1,97 @@
+app:
+  stage: test
+  version: '<<RELEASE>>'
+  release: '<<RELEASE>>'
+  buildTime: '<<BUILD_TIME>>'
+  runQueueWorkers: 'false'
+  apiBaseUrl: 'http://localhost:3001'
+  frontendUrl: 'http://localhost:3000'
+
+http:
+  port: '3001'
+  hostname: '0.0.0.0'
+  cors:
+    all: 'true'
+    maxAge: '3600'
+  log: 'true'
+
+logger:
+  output: 'console'
+  level: 'warn' # default log level
+  contexts: # per context log level
+    InstanceLoader: 'warn'
+    RouterExplorer: 'warn'
+    HttpException: 'warn'
+
+swagger:
+  prefix: 'docs'
+  # username:
+  # password:
+
+database:
+  name: 'myapp-test'
+  host: 'localhost'
+  port: '5432'
+  username: 'admin'
+  password: 'admin'
+  log: ['warn', 'error']
+  runMigrations: 'false'
+
+webhookMediaValidation:
+  enabled: 'false'
+  callbackHeaderAuthentication: 'string'
+
+auth:
+  saltRounds: '10'
+  accessTokenSecret: 'access-token-secret'
+  accessTokenExpiration: '3600'
+  refreshTokenSecret: 'refresh-token-secret'
+  refreshTokenExpiration: '604800'
+
+authPassword:
+  enabled: 'true'
+  codeLength: '32'
+  codeExpiration: '3600'
+
+authSocialGoogle:
+  clientId: 'test'
+  clientSecret: 'test'
+  scopes: ''
+  responseType: 'code'
+
+utilityAuthSocialGoogle:
+  enabled: 'true'
+  frontendUrl: 'http://localhost:3000'
+
+authSocialFacebook:
+  version: 'v19.0'
+  appId: 'test'
+  appSecret: 'test'
+  scopes: ''
+  responseType: 'code'
+  userInfoFields: ''
+
+utilityAuthSocialFacebook:
+  enabled: 'true'
+  frontendUrl: 'http://localhost:3000'
+
+mediaPresignedUrl:
+  uploadFolder: 'uploads'
+  region: 'us-east-1'
+  bucket: 'media'
+  # accessKeyId:
+  # secretAccessKey:
+  # apiEndpoint:
+
+email:
+  region: 'us-east-1'
+  emailFrom: 'test@email.com'
+  # accessKeyId: ''
+  # secretAccessKey: ''
+  # apiEndpoint:
+
+fcm:
+  setupRequired: 'false'
+  projectId: ''
+  privateKey: ''
+  clientEmail: ''

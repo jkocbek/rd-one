@@ -1,0 +1,199 @@
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+model User {
+    id        String   @id @default(uuid()) @db.Uuid
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+    email     String   @unique
+    password  String?
+    roles     String[]
+
+    userIdentityProviders  UserIdentityProvider[]
+    userInvitation         UserInvitation?
+    pushNotificationTokens PushNotificationToken[]
+    medias                 Media[]
+    passwordForgots        PasswordForgot[]
+    userSessions           UserSession[]
+    refreshTokens          RefreshToken[]
+    posts                  Post[]
+    sentFriendRequests     FriendRequest[] @relation("SentFriendRequests")
+    receivedFriendRequests FriendRequest[] @relation("ReceivedFriendRequests")
+    friends                Friend[] @relation("UserFriends")
+    userFriends            Friend[] @relation("UserAsFriend")
+}
+
+model UserIdentityProvider {
+    id        String   @id @default(uuid()) @db.Uuid
+    sub       String
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    source        String? // awsCognito, auth0, etc.
+    integration   String? // google, facebook, apple, etc. (social logins)
+    emailVerified Boolean @default(false)
+
+    userId String @db.Uuid
+
+    user         User          @relation(fields: [userId], references: [id])
+    userSessions UserSession[]
+
+    @@unique([source, sub])
+}
+
+model UserInvitation {
+    id        String   @id @default(uuid()) @db.Uuid
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+    token     String   @unique
+    expireAt  DateTime
+
+    userId String @unique @db.Uuid
+
+    user User @relation(fields: [userId], references: [id])
+}
+
+model UserSession {
+    id        String   @id @default(uuid()) @db.Uuid
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+    jti       String
+    expireAt  DateTime // this allows cleaning up expired tokens
+
+    userId                 String @db.Uuid
+    userIdentityProviderId String @db.Uuid
+
+    user                 User                 @relation(fields: [userId], references: [id])
+    userIdentityProvider UserIdentityProvider @relation(fields: [userIdentityProviderId], references: [id])
+    refreshTokens        RefreshToken[]
+
+    @@unique([jti])
+}
+
+model RefreshToken {
+    id        String   @id @default(uuid()) @db.Uuid
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+    token     String
+    expireAt  DateTime // this allows cleaning up expired tokens
+
+    userSessionId String @unique @db.Uuid
+    userId        String @db.Uuid
+
+    user        User        @relation(fields: [userId], references: [id])
+    userSession UserSession @relation(fields: [userSessionId], references: [id])
+
+    @@unique([token])
+}
+
+model PasswordForgot {
+    id        String   @id @default(uuid()) @db.Uuid
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+    code      String
+    expireAt  DateTime
+
+    userId String @db.Uuid
+
+    user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    @@unique([code])
+    @@unique([userId, code])
+}
+
+model PushNotificationToken {
+    id        String   @id @default(uuid()) @db.Uuid
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+    token     String
+
+    userId String @db.Uuid
+
+    user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Media {
+    id        String   @id @default(uuid()) @db.Uuid
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+    objectKey String   @unique
+    url       String   @unique
+    status    String
+    use       String
+    mimeType  String?
+
+    userId String @db.Uuid
+
+    user User @relation(fields: [userId], references: [id])
+}
+
+model EmailTemplate {
+    id        String   @id @default(uuid()) @db.Uuid
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    name        String
+    description String?
+
+    emailTemplateVersions EmailTemplateVersion[]
+}
+
+model EmailTemplateVersion {
+    id        String   @id @default(uuid()) @db.Uuid
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    label       String
+    subject     String
+    content     String
+    contentType String
+    textContent String?
+    type        String?
+    style       String?
+
+    emailTemplateId String @db.Uuid
+
+    emailTemplate EmailTemplate @relation(fields: [emailTemplateId], references: [id], onDelete: Cascade)
+
+    @@unique([type])
+}
+
+model Post {
+    id        String   @id @default(uuid()) @db.Uuid
+    userId    String   @db.Uuid
+    caption   String
+    photoUrl  String
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+    deletedAt DateTime
+
+    user User @relation(fields: [userId], references: [id])
+}
+
+model FriendRequest {
+    id          String   @id @default(uuid()) @db.Uuid
+    senderId    String   @db.Uuid
+    recipientId String   @db.Uuid
+    createdAt   DateTime @default(now())
+    updatedAt   DateTime @updatedAt
+
+    sender    User @relation("SentFriendRequests", fields: [senderId], references: [id])
+    recipient User @relation("ReceivedFriendRequests", fields: [recipientId], references: [id])
+}
+
+model Friend {
+    id        String   @id @default(uuid()) @db.Uuid
+    userId    String   @db.Uuid
+    friendId  String   @db.Uuid
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    user   User @relation("UserFriends", fields: [userId], references: [id])
+    friend User @relation("UserAsFriend", fields: [friendId], references: [id])
+}

@@ -1,0 +1,25 @@
+# ECS Deploy configuration file
+# @see https://github.com/poviolabs/ecs-deploy-cli/tree/v4.1?tab=readme-ov-file#configure
+
+accountId: "000000000000"
+region: us-east-1
+
+# build and upload to ecr with `ecs-deploy build backend --stage dev`
+build:
+  - name: backend
+    repoName: myapp-backend
+    #context: ./test
+    #dockerfile: Dockerfile
+    platform: linux/amd64
+    environment:
+      # used at build time
+      BUILD_VAR: value
+
+# resolved at runtime using `ecs-deploy config backend --stage dev`
+configs:
+  - name: api
+    region: us-east-1
+    destination: ./.config/local.api.yml
+    values:
+      - name: "@"
+        configFrom: api.template

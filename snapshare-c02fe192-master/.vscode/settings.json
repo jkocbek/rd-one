@@ -1,0 +1,5 @@
+{
+  "typescript.tsdk": "node_modules/typescript/lib",
+  "eslint.validate": ["javascript", "typescript"],
+  "editor.formatOnSave": false // To prevent conflicts between Prettier and ESLint auto-fixes
+}

@@ -1,0 +1,57 @@
+# ECS Deploy configuration file
+# @see https://github.com/poviolabs/ecs-deploy-cli/tree/v4.1?tab=readme-ov-file#configure
+
+accountId: "000000000000"
+region: us-east-1
+taskFamily: myapp-dev-backend
+serviceName: myapp-dev-backend
+clusterName: myapp-dev
+
+# build and upload to ecr with `ecs-deploy build backend --stage dev`
+build:
+  - name: backend
+    repoName: myapp-backend
+    #context: ./test
+    #dockerfile: Dockerfile
+    platform: linux/amd64
+    environment:
+      # used at build time
+      BUILD_VAR: value
+
+# deploy to ecs with `ecs-deploy deploy --stage dev`
+taskDefinition:
+  - name: default
+    template: arn:aws:ssm:::parameter/myapp-dev/backend/task-definition
+    containerDefinitions:
+      - name: backend
+        # name of build above or any other docker path
+        image: backend
+
+        # inserted into task definition
+        environment:
+          STAGE1: dev
+        # inserted into task definition and resolved at task init
+        secrets:
+          STAGE2: arn:aws:ssm:::parameter/myapp-dev/backend/task-definition
+
+# resolved at runtime using `ecs-deploy config backend --stage dev`
+configs:
+  - name: backend
+    destination: ./.config/myapp-dev.backend.yml
+    values:
+        # load config from ./.config/${stage}.backend.template.yml
+        # and interpolate ${arn:aws:ssm..} and ${env:ENV_VALUE} values
+        # load them onto the root
+      - name: "@"
+        configFrom: backend.template
+
+        # simple value mapping
+      - name: database__password
+        valueFrom: arn:aws:ssm:::parameter/myapp-dev/database/password
+
+        # JSON object mapping
+      - name: database
+        valueFrom: arn:aws:ssm:::parameter/myapp-dev/database
+
+      - name: database__host
+        valueFrom: env:DATABASE_HOST

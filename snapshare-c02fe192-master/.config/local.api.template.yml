@@ -1,0 +1,98 @@
+app:
+  stage: local
+  version: '<<RELEASE>>'
+  release: ${func:release}
+  buildTime: ${func:timestamp}
+  runQueueWorkers: 'false'
+  apiBaseUrl: 'http://localhost:3001'
+  frontendUrl: 'http://localhost:3000'
+
+http:
+  port: '3001'
+  hostname: '0.0.0.0'
+  cors:
+    all: 'true'
+    maxAge: '3600'
+  log: 'true'
+  prefix: /api
+logger:
+  output: 'console'
+  level: 'debug' # default log level
+  contexts: # per context log level
+    InstanceLoader: 'warn'
+    RouterExplorer: 'warn'
+    HttpException: 'log'
+
+swagger:
+  prefix: 'docs'
+  # username:
+  # password:
+
+database:
+  url: 'postgresql://admin:admin@localhost:5432/postgres'
+  # name: 'postgres'
+  # host: 'localhost'
+  # port: '5432'
+  # username: 'admin'
+  # password: 'admin'
+  log: ['query', 'info', 'warn', 'error']
+  runMigrations: 'true'
+
+webhookMediaValidation:
+  enabled: 'false'
+  callbackHeaderAuthentication: 'string'
+
+auth:
+  saltRounds: '12'
+  accessTokenSecret: 'access-token-secret'
+  accessTokenExpiration: '3600'
+  refreshTokenSecret: 'refresh-token-secret'
+  refreshTokenExpiration: '604800'
+
+authPassword:
+  enabled: 'true'
+  codeLength: '32'
+  codeExpiration: '3600'
+
+authSocialGoogle:
+  clientId: 'string' # DEV: Set this
+  clientSecret: 'string' # DEV: Set this
+  scopes: 'https://www.googleapis.com/auth/userinfo.email,https://www.googleapis.com/auth/userinfo.profile'
+  responseType: 'code'
+
+utilityAuthSocialGoogle:
+  enabled: 'true'
+  frontendUrl: 'http://localhost:3000'
+
+authSocialFacebook:
+  version: 'v19.0'
+  appId: 'string' # DEV: Set this
+  appSecret: 'string' # DEV: Set this
+  scopes: 'email'
+  responseType: 'code'
+  userInfoFields: 'id,email'
+
+utilityAuthSocialFacebook:
+  enabled: 'true'
+  frontendUrl: 'http://localhost:3000'
+
+mediaPresignedUrl:
+  uploadFolder: 'uploads'
+  region: 'us-east-1'
+  bucket: 'media'
+  # accessKeyId:
+  # secretAccessKey:
+  # apiEndpoint:
+
+email:
+  region: 'us-east-1'
+  emailFrom: 'email@email.com'
+  # accessKeyId: ''
+  # secretAccessKey: ''
+  # apiEndpoint:
+
+fcm:
+  setupRequired: 'false'
+  projectId: ''
+  privateKey: ''
+  clientEmail: ''
